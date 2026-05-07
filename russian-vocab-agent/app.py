@@ -1,10 +1,8 @@
-from flask import Flask, jsonify, render_template
-from db import init_db, get_all_words, get_seen_word_list
 import sqlite3
-from pathlib import Path
+from flask import Flask, jsonify, render_template
+from db import init_db, DB_PATH
 
 app = Flask(__name__)
-DB_PATH = Path(__file__).parent / "vocab.db"
 
 
 def _connect():
