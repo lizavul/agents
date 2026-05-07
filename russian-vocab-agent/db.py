@@ -116,3 +116,9 @@ def get_all_words() -> list[dict]:
             "SELECT * FROM words ORDER BY created_at DESC"
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+def get_seen_word_list() -> list[str]:
+    with _connect() as conn:
+        rows = conn.execute("SELECT word FROM words").fetchall()
+    return [r["word"] for r in rows]
