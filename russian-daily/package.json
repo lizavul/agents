@@ -1,0 +1,22 @@
+{
+  "name": "russian-daily",
+  "version": "1.0.0",
+  "description": "Daily Russian words + articles agent with hosted platform",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "agent": "node -e \"import('./src/agent.js').then(m => m.runAgent())\""
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "better-sqlite3": "^12.9.0",
+    "express": "^4.18.2",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.9"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
