@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Russian Vocab</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f4f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e4e2db;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      flex: 1;
+    }
+
+    #word-count {
+      font-size: 13px;
+      color: #888;
+      white-space: nowrap;
+    }
+
+    #search {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 14px;
+      width: 220px;
+      outline: none;
+      background: #fafaf8;
+    }
+    #search:focus { border-color: #1a6b3c; background: #fff; }
+
+    .filters {
+      padding: 16px 32px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-btn {
+      border: 1px solid #ddd;
+      background: #fff;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #444;
+      transition: all .15s;
+    }
+    .filter-btn:hover { border-color: #1a6b3c; color: #1a6b3c; }
+    .filter-btn.active { background: #1a6b3c; border-color: #1a6b3c; color: #fff; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      padding: 0 32px 32px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e4e2db;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .card-theme {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #1a6b3c;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .card-word {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: Georgia, serif;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .card-pos {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+
+    .card-translation {
+      font-size: 15px;
+      color: #333;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .card-example {
+      font-size: 13px;
+      color: #666;
+      font-style: italic;
+      line-height: 1.5;
+      border-left: 3px solid #e4e2db;
+      padding-left: 10px;
+    }
+
+    .card-date {
+      font-size: 11px;
+      color: #bbb;
+      margin-top: 12px;
+      text-align: right;
+    }
+
+    #empty {
+      display: none;
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 0;
+      color: #aaa;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🇷🇺 Russian Vocab</h1>
+  <span id="word-count"></span>
+  <input id="search" type="search" placeholder="Search words…" autocomplete="off">
+</header>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-theme="all">All</button>
+</div>
+
+<div class="grid" id="grid">
+  <div id="empty">No words match your search.</div>
+</div>
+
+<script>
+  let allWords = [];
+  let activeTheme = "all";
+
+  async function load() {
+    const [words, themes] = await Promise.all([
+      fetch("/api/words").then(r => r.json()),
+      fetch("/api/themes").then(r => r.json()),
+    ]);
+
+    allWords = words;
+
+    const filters = document.getElementById("filters");
+    themes.forEach(t => {
+      const btn = document.createElement("button");
+      btn.className = "filter-btn";
+      btn.dataset.theme = t;
+      btn.textContent = t;
+      filters.appendChild(btn);
+    });
+
+    filters.addEventListener("click", e => {
+      const btn = e.target.closest(".filter-btn");
+      if (!btn) return;
+      activeTheme = btn.dataset.theme;
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b === btn));
+      render();
+    });
+
+    document.getElementById("search").addEventListener("input", render);
+    render();
+  }
+
+  function render() {
+    const query = document.getElementById("search").value.trim().toLowerCase();
+    const grid = document.getElementById("grid");
+    const empty = document.getElementById("empty");
+
+    const filtered = allWords.filter(w => {
+      if (activeTheme !== "all" && w.theme !== activeTheme) return false;
+      if (!query) return true;
+      return (
+        w.word.toLowerCase().includes(query) ||
+        w.translation.toLowerCase().includes(query) ||
+        w.example_ru.toLowerCase().includes(query)
+      );
+    });
+
+    document.getElementById("word-count").textContent =
+      `${filtered.length} of ${allWords.length} words`;
+
+    const cards = filtered.map(w => `
+      <div class="card">
+        <div class="card-theme">${w.theme}</div>
+        <div class="card-word">${w.word}</div>
+        <div class="card-pos">${w.pos}</div>
+        <div class="card-translation">${w.translation}</div>
+        <div class="card-example">${w.example_ru}</div>
+        <div class="card-date">${w.run_date}</div>
+      </div>
+    `).join("");
+
+    grid.innerHTML = cards + `<div id="empty" style="display:${filtered.length ? 'none' : 'block'}">No words match your search.</div>`;
+  }
+
+  load();
+</script>
+</body>
+</html>
