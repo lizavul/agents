@@ -1,0 +1,30 @@
+name: Build iOS app
+on:
+  push:
+    branches:
+      - main
+      - fix-ci
+    paths:
+      - 'custom-payment-flow/client/ios-swiftui/**'
+      - '!**.css'
+      - '!**.md'
+  workflow_dispatch:
+
+jobs:
+  ios_build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Build
+        working-directory: custom-payment-flow/client/ios-swiftui
+        run: |
+          pod install
+          xcodebuild build \
+                     -scheme AcceptAPayment \
+                     -workspace AcceptAPayment.xcworkspace/ \
+                     CODE_SIGN_IDENTITY="" \
+                     CODE_SIGNING_REQUIRED="NO" \
+                     CODE_SIGN_ENTITLEMENTS="" \
+                     CODE_SIGNING_ALLOWED="NO"

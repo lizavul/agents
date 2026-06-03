@@ -1,0 +1,34 @@
+name: Server Tests (Go)
+on:
+  push:
+    branches:
+      - main
+      - fix-ci
+    paths:
+      - 'custom-payment-flow/server/go/**'
+      - 'prebuilt-checkout-page/server/go/**'
+      - 'payment-element/server/go/**'
+      - 'elements-with-checkout-sessions/server/go/**'
+      - '!**.md'
+  pull_request:
+    paths:
+      - 'custom-payment-flow/server/go/**'
+      - 'prebuilt-checkout-page/server/go/**'
+      - 'payment-element/server/go/**'
+      - 'elements-with-checkout-sessions/server/go/**'
+      - '!**.md'
+  workflow_dispatch:
+
+jobs:
+  server_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime:
+          - server_type: go
+            server_image: golang:latest
+    uses: ./.github/workflows/wf_server_test.yaml
+    secrets: inherit
+    with:
+      server_type: ${{ matrix.runtime.server_type }}
+      server_image: ${{ matrix.runtime.server_image }}

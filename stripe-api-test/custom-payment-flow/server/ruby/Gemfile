@@ -1,0 +1,12 @@
+source 'https://rubygems.org/'
+
+gem 'dotenv'
+gem 'json'
+gem 'rackup'
+gem 'sinatra'
+gem 'sinatra-contrib'
+gem 'logger'
+gem 'ostruct'
+gem 'stripe', '~> 18.2'
+gem 'toml-rb'
+gem 'webrick'
