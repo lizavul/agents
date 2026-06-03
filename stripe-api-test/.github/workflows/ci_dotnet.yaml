@@ -1,0 +1,34 @@
+name: Server Tests (dotnet)
+on:
+  push:
+    branches:
+      - main
+      - fix-ci
+    paths:
+      - 'custom-payment-flow/server/dotnet/**'
+      - 'prebuilt-checkout-page/server/dotnet/**'
+      - 'payment-element/server/dotnet/**'
+      - 'elements-with-checkout-sessions/server/dotnet/**'
+      - '!**.md'
+  pull_request:
+    paths:
+      - 'custom-payment-flow/server/dotnet/**'
+      - 'prebuilt-checkout-page/server/dotnet/**'
+      - 'payment-element/server/dotnet/**'
+      - 'elements-with-checkout-sessions/server/dotnet/**'
+      - '!**.md'
+  workflow_dispatch:
+
+jobs:
+  server_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime:
+          - server_type: dotnet
+            server_image: mcr.microsoft.com/dotnet/sdk:latest
+    uses: ./.github/workflows/wf_server_test.yaml
+    secrets: inherit
+    with:
+      server_type: ${{ matrix.runtime.server_type }}
+      server_image: ${{ matrix.runtime.server_image }}

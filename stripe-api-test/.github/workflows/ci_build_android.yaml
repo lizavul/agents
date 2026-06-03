@@ -1,0 +1,23 @@
+name: Build Android app
+on:
+  push:
+    branches:
+      - main
+      - fix-ci
+    paths:
+      - 'custom-payment-flow/client/android-kotlin/**'
+      - '!**.css'
+      - '!**.md'
+  workflow_dispatch:
+
+jobs:
+  android_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Build
+        working-directory: custom-payment-flow/client/android-kotlin
+        run: |
+          ./gradlew build

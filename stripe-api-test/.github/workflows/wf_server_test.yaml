@@ -1,0 +1,69 @@
+name: Server Test
+
+on:
+  workflow_call:
+    inputs:
+      server_type:
+        required: true
+        type: string
+      server_image:
+        required: true
+        type: string
+jobs:
+  server_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - sample: custom-payment-flow
+            tests: custom_payment_flow_server_spec.rb
+          - sample: prebuilt-checkout-page
+            tests: prebuilt_checkout_page_spec.rb
+          - sample: payment-element
+            tests: payment_element_server_spec.rb
+          - sample: elements-with-checkout-sessions
+            tests: elements_with_checkout_sessions_server_spec.rb
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Checkout CI runner
+        uses: actions/checkout@v4
+        with:
+          repository: 'stripe-samples/sample-ci'
+          path: 'sample-ci'
+
+      - name: Run tests
+        # Only run elements-with-checkout-sessions on latest images (skip legacy versions)
+        if: ${{ matrix.target.sample != 'elements-with-checkout-sessions' || contains(fromJSON('["node:latest","node:lts","ruby:latest","python:latest","golang:latest","maven:latest","mcr.microsoft.com/dotnet/sdk:9.0"]'), inputs.server_image) }}
+        env:
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.TEST_STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
+          PRICE: ${{ secrets.TEST_PRICE }}
+        run: |
+          source sample-ci/helpers.sh
+          setup_dependencies
+
+          install_docker_compose_settings
+          export STRIPE_WEBHOOK_SECRET=$(retrieve_webhook_secret)
+          cat <<EOF >> .env
+            DOMAIN=http://web:4242
+            PRICE=${{ secrets.TEST_PRICE }}
+            PAYMENT_METHOD_TYPES="card"
+          EOF
+
+          configure_docker_compose_for_integration "${{ matrix.target.sample }}" "${{ inputs.server_type }}" ../../client/html "${{ inputs.server_image }}"
+
+          docker compose up -d && wait_web_server
+          docker compose exec -T runner bundle exec rspec spec/${{ matrix.target.tests }}
+
+      - name: Collect debug information
+        if: ${{ failure() }}
+        run: |
+          # In this demo, .env contains test-mode keys only. Don't log .env
+          # contents with live keys in a production environment.
+          cat .env
+          cat docker-compose.yml
+          docker compose ps -a
+          docker compose logs web

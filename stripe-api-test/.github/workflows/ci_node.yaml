@@ -1,0 +1,40 @@
+name: Server Tests (Node)
+on:
+  push:
+    branches:
+      - main
+      - fix-ci
+    paths:
+      - 'custom-payment-flow/server/node/**'
+      - 'custom-payment-flow/server/node-typescript/**'
+      - 'prebuilt-checkout-page/server/node/**'
+      - 'payment-element/server/node/**'
+      - 'payment-element/server/node-typescript/**'
+      - 'elements-with-checkout-sessions/server/node/**'
+      - '!**.md'
+  pull_request:
+    paths:
+      - 'custom-payment-flow/server/node/**'
+      - 'custom-payment-flow/server/node-typescript/**'
+      - 'prebuilt-checkout-page/server/node/**'
+      - 'payment-element/server/node/**'
+      - 'payment-element/server/node-typescript/**'
+      - 'elements-with-checkout-sessions/server/node/**'
+      - '!**.md'
+  workflow_dispatch:
+
+jobs:
+  server_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime:
+          - server_type: node
+            server_image: node:latest
+          - server_type: node
+            server_image: node:lts
+    uses: ./.github/workflows/wf_server_test.yaml
+    secrets: inherit
+    with:
+      server_type: ${{ matrix.runtime.server_type }}
+      server_image: ${{ matrix.runtime.server_image }}

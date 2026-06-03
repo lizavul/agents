@@ -1,0 +1,83 @@
+{
+  "name": "accept-a-payment",
+  "configureDotEnv": true,
+  "integrations": [
+    {
+      "name": "payment-element",
+      "clients": ["html", "react-cra"],
+      "servers": [
+        "ruby",
+        "node",
+        "python",
+        "php",
+        "java",
+        "go",
+        "dotnet",
+        "node-typescript"
+      ],
+      "clientEnvOverrides": {
+        "react-cra": {
+          "DOMAIN": "http://localhost:3000"
+        }
+      }
+    },
+    {
+      "name": "prebuilt-checkout-page",
+      "clients": ["html", "react-cra", "vue-cva"],
+      "servers": [
+        "ruby",
+        "node",
+        "python",
+        "php",
+        "java",
+        "go",
+        "dotnet"
+      ],
+      "clientEnvOverrides": {
+        "react-cra": {
+          "DOMAIN": "http://localhost:3000"
+        },
+        "vue-cva": {
+          "DOMAIN": "http://localhost:3000"
+        }
+      }
+    },
+    {
+      "name": "custom-payment-flow",
+      "clients": ["html", "react-cra", "ios", "android-kotlin", "ios-swiftui"],
+      "servers": [
+        "ruby",
+        "node",
+        "python",
+        "php",
+        "java",
+        "go",
+        "dotnet",
+        "node-typescript"
+      ],
+      "clientEnvOverrides": {
+        "react-cra": {
+          "DOMAIN": "http://localhost:3000"
+        }
+      }
+    },
+    {
+      "name": "elements-with-checkout-sessions",
+      "clients": ["html", "react-cra"],
+      "servers": [
+        "ruby",
+        "node",
+        "python",
+        "php",
+        "java",
+        "go",
+        "dotnet"
+      ],
+      "clientEnvOverrides": {
+        "react-cra": {
+          "DOMAIN": "http://localhost:3000"
+        }
+      }
+    }
+  ]
+}

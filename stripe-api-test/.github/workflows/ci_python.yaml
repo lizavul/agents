@@ -1,0 +1,36 @@
+name: Server Tests (Python)
+on:
+  push:
+    branches:
+      - main
+      - fix-ci
+    paths:
+      - 'custom-payment-flow/server/python/**'
+      - 'prebuilt-checkout-page/server/python/**'
+      - 'payment-element/server/python/**'
+      - 'elements-with-checkout-sessions/server/python/**'
+      - '!**.md'
+  pull_request:
+    paths:
+      - 'custom-payment-flow/server/python/**'
+      - 'prebuilt-checkout-page/server/python/**'
+      - 'payment-element/server/python/**'
+      - 'elements-with-checkout-sessions/server/python/**'
+      - '!**.md'
+  workflow_dispatch:
+
+jobs:
+  server_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime:
+          - server_type: python
+            server_image: python:latest
+          - server_type: python
+            server_image: python:3.8
+    uses: ./.github/workflows/wf_server_test.yaml
+    secrets: inherit
+    with:
+      server_type: ${{ matrix.runtime.server_type }}
+      server_image: ${{ matrix.runtime.server_image }}
